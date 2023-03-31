@@ -1,7 +1,7 @@
 # Building Transformer Models with Attention
 ## Implementation from Scrath in Tensorflow Keras
 
-Following [this book](https://machinelearningmastery.com/transformer-models-with-attention/) to teach myself about transformer in depths.
+Following [this book](https://machinelearningmastery.com/transformer-models-with-attention/) to teach myself about transformer in depth.
 
 Other excellent resources I come across along the way:
 * [Illustrated Guide to Transformers Neural Network: A step by step explanation](https://youtu.be/4Bdc55j80l8) - by Michael Phi [@LearnedVector](https://github.com/LearnedVector)
