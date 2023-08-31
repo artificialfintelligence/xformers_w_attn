@@ -24,8 +24,8 @@ class MultiHeadAttention(Layer):
     def __init__(self, n_heads, d_model, **kwargs):
         super().__init__(**kwargs)
 
-        assert d_model % h == 0
-        d_k = d_model // h
+        assert d_model % n_heads == 0
+        d_k = d_model // n_heads
         # We assume d_v always equals d_k
         d_v = d_k
 
