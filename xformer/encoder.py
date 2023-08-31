@@ -19,17 +19,17 @@ class EncoderLayer(Layer):
         # Add in a dropout layer
         multihead_output = self.dropout1(multihead_output, training=training)
         # Followed by an Add & Norm layer
-        addnorm_output = self.add_norm1(x, multihead_output)
+        addnorm_output1 = self.add_norm1(x, multihead_output)
         # Expected output shape = (batch_size, sequence_length, d_model)
         # Followed by a fully connected layer
-        feedforward_output = self.feed_forward(addnorm_output)
+        feedforward_output = self.feed_forward(addnorm_output1)
         # Expected output shape = (batch_size, sequence_length, d_model)
         # Add in another dropout layer
         feedforward_output = self.dropout2(
             feedforward_output, training=training
         )
         # Followed by another Add & Norm layer
-        return self.add_norm2(addnorm_output, feedforward_output)
+        return self.add_norm2(addnorm_output1, feedforward_output)
 
 class Encoder(Layer):
     def __init__(
