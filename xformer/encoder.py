@@ -1,7 +1,4 @@
-from tensorflow.keras.layers import (
-    Dropout,
-    Layer,
-)
+from tensorflow.keras.layers import Dropout, Layer
 from xformer.multihead_attention import MultiHeadAttention
 from xformer.positional_encoding import CustomEmbeddingWithFixedPosnWts
 

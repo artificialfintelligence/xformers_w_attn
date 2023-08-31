@@ -1,9 +1,4 @@
-from tensorflow.keras.layers import (
-    Dense,
-    Layer,
-    LayerNormalization,
-    ReLU,
-)
+from tensorflow.keras.layers import Dense, Layer, LayerNormalization, ReLU
 
 class FeedForward(Layer):
     def __init__(self, d_ff, d_model, **kwargs):
