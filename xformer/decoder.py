@@ -20,25 +20,19 @@ class DecoderLayer(Layer):
         # Multi-head self-attention layer
         multihead_output1 = self.multihead_attention1(x, x, x, lookahead_mask)
         # Expected output shape = (batch_size, sequence_length, d_model)
-
         # Add in a dropout layer
         multihead_output1 = self.dropout1(multihead_output1, training=training)
-
         # Followed by an Add & Norm layer
         addnorm_output1 = self.add_norm1(x, multihead_output1)
         # Expected output shape = (batch_size, sequence_length, d_model)
-
         # Followed by another multi-head (cross-)attention layer
         multihead_output2 = self.multihead_attention2(
             addnorm_output1, encoder_output, encoder_output, padding_mask
         )
-
         # Add in another dropout layer
         multihead_output2 = self.dropout2(multihead_output2, training=training)
-        
         # Followed by another Add & Norm layer
         addnorm_output2 = self.add_norm2(addnorm_output1, multihead_output2)
-        
         # Followed by a fully connected layer
         feedforward_output = self.feed_forward(addnorm_output2)
         # Expected output shape = (batch_size, sequence_length, d_model)
