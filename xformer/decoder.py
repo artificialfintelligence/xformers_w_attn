@@ -16,9 +16,9 @@ class DecoderLayer(Layer):
         self.dropout3 = Dropout(dropout_rate)
         self.add_norm3 = AddAndNorm()
 
-    def call(self, x, lookahead_mask, encoder_output, encoder_padding_mask, training):
+    def call(self, x, mask, encoder_output, encoder_mask, training):
         # Multi-head self-attention layer
-        multihead_output1 = self.multihead_attention1(x, x, x, lookahead_mask)
+        multihead_output1 = self.multihead_attention1(x, x, x, mask)
         # Expected output shape = (batch_size, sequence_length, d_model)
         # Add in a dropout layer
         multihead_output1 = self.dropout1(multihead_output1, training=training)
@@ -27,7 +27,7 @@ class DecoderLayer(Layer):
         # Expected output shape = (batch_size, sequence_length, d_model)
         # Followed by another multi-head (cross-)attention layer
         multihead_output2 = self.multihead_attention2(
-            addnorm_output1, encoder_output, encoder_output, encoder_padding_mask
+            addnorm_output1, encoder_output, encoder_output, encoder_mask
         )
         # Add in another dropout layer
         multihead_output2 = self.dropout2(multihead_output2, training=training)
@@ -67,9 +67,9 @@ class Decoder(Layer):
     def call(
         self,
         output_target,
-        lookahead_mask,
+        mask,
         encoder_output,
-        encoder_padding_mask,
+        encoder_mask,
         training,
     ):
         # Generate the positional encoding
@@ -79,5 +79,5 @@ class Decoder(Layer):
         x = self.dropout(pos_encoding_output, training=training)
         # Pass on the positional encoded values to each encoder layer
         for i, layer in enumerate(self.decoder_layer):
-            x = layer(x, lookahead_mask, encoder_output, encoder_padding_mask, training)
+            x = layer(x, mask, encoder_output, encoder_mask, training)
         return x
