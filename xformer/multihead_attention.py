@@ -38,8 +38,8 @@ class MultiHeadAttention(Layer):
         self.W_v = Dense(d_v)  # ... for the values
         self.W_o = Dense(d_model)  # ... for the multi-head output
 
-    def reshape_tensor(self, x, n_heads, do_split_flag):
-        if do_split_flag:
+    def reshape_tensor(self, x, n_heads, in_flag):
+        if in_flag:
             # Tensor shape after reshaping and transposing:
             # (batch_size, n_heads, seq_length, -1)
             x = reshape(x, shape=(shape(x)[0], shape(x)[1], n_heads, -1))
@@ -66,13 +66,13 @@ class MultiHeadAttention(Layer):
 
         # Compute the multi-head attention output using the reshaped queries, keys,
         # and values
-        o_reshaped = self.attention(q_reshaped, k_reshaped, v_reshaped, mask)
+        o = self.attention(q_reshaped, k_reshaped, v_reshaped, mask)
         # Resulting tensor shape: (batch_size, n_heads, input_seq_length, -1)
 
         # Rearrange back the output into concatenated form
-        output = self.reshape_tensor(o_reshaped, self.n_heads, False)
+        o_reshaped = self.reshape_tensor(o, self.n_heads, False)
         # Resulting tensor shape: (batch_size, input_seq_length, d_v)
 
         # Apply one final linear projection to the output to generate the multi-head
         # attention. Resulting tensor shape: (batch_size, input_seq_length, d_model)
-        return self.W_o(output)
+        return self.W_o(o_reshaped)
