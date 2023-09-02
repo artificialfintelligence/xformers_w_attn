@@ -13,9 +13,9 @@ class EncoderLayer(Layer):
         self.dropout2 = Dropout(dropout_rate)
         self.add_norm2 = AddAndNorm()
 
-    def call(self, x, padding_mask, training):
+    def call(self, x, mask, training):
         # Multi-head attention layer
-        multihead_output = self.multihead_attention(x, x, x, padding_mask)
+        multihead_output = self.multihead_attention(x, x, x, mask)
         # Expected output shape = (batch_size, sequence_length, d_model)
         # Add in a dropout layer
         multihead_output = self.dropout1(multihead_output, training=training)
@@ -54,7 +54,7 @@ class Encoder(Layer):
             for _ in range(n_enc_layers)
         ]
 
-    def call(self, input_sentence, padding_mask, training):
+    def call(self, input_sentence, mask, training):
         # Generate the word embeddings & positional encodings
         emb_enc_output = self.wrd_emb_posn_enc(input_sentence)
         # Expected output shape = (batch_size, sequence_length, d_model)
@@ -62,5 +62,5 @@ class Encoder(Layer):
         x = self.dropout(emb_enc_output, training=training)
         # Feed the result into the stack of encoder layers
         for i, layer in enumerate(self.encoder_layers):
-            x = layer(x, padding_mask, training)
+            x = layer(x, mask, training)
         return x
