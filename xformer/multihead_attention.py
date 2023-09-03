@@ -37,25 +37,20 @@ class MultiHeadAttention(Layer):
         if in_flag:
             # Tensor shape after reshaping and transposing:
             # (batch_size, n_heads, seq_length, -1)
-            print(f"Before reshape: {x.shape=} ({in_flag=})")
             x = reshape(x, shape=(shape(x)[0], shape(x)[1], n_heads, -1))
             x = transpose(x, perm=(0, 2, 1, 3))
-            print(f"After reshape: {x.shape=} ({in_flag=})")
         else:
             # Reverting the reshaping and transposing operations:
             # (batch_size, seq_length, d_model)
-            print(f"Before reshape: {x.shape=} ({in_flag=})")
             x = transpose(x, perm=(0, 2, 1, 3))
             x = reshape(x, shape=(shape(x)[0], shape(x)[1], -1))
-            print(f"After reshape: {x.shape=} ({in_flag=})")
         return x
 
     def call(self, queries, keys, values, mask=None):
         # Rearrange the queries to be able to compute all heads in parallel
-        print(f"{queries.shape=}")
         q_reshaped = self.reshape_tensor(self.W_q(queries), self.n_heads, True)
         # Resulting tensor shape: (batch_size, n_heads, input_seq_length, -1)
-        print(f"{q_reshaped.shape=}")
+
         # Rearrange the keys to be able to compute all heads in parallel
         k_reshaped = self.reshape_tensor(self.W_k(keys), self.n_heads, True)
         # Resulting tensor shape: (batch_size, n_heads, input_seq_length, -1)
