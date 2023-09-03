@@ -37,13 +37,13 @@ class MultiHeadAttention(Layer):
         if in_flag:
             # Tensor shape after reshaping and transposing:
             # (batch_size, n_heads, seq_length, -1)
-            x = reshape(x, shape=(shape(x)[0], shape(x)[1], n_heads, -1))
+            x = reshape(x, shape=(shape(x)[0], shape(x)[1], n_heads, int(shape(x)[2] / n_heads)))
             x = transpose(x, perm=(0, 2, 1, 3))
         else:
             # Reverting the reshaping and transposing operations:
             # (batch_size, seq_length, d_model)
             x = transpose(x, perm=(0, 2, 1, 3))
-            x = reshape(x, shape=(shape(x)[0], shape(x)[1], -1))
+            x = reshape(x, shape=(shape(x)[0], shape(x)[1], int(shape(x)[2] * shape(x)[3])))
         return x
 
     def call(self, queries, keys, values, mask=None):
