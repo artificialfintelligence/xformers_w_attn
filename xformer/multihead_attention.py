@@ -25,37 +25,37 @@ class MultiHeadAttention(Layer):
         super().__init__(**kwargs)
 
         assert d_model % n_heads == 0
-        d_k = d_model // n_heads
-        # We assume d_v always equals d_k
-        d_v = d_k
 
         self.attention = DotProductAttention()  # Scaled dot product attention
         self.n_heads = n_heads  # Number of attention heads
-        self.d_k = d_k  # Dim of the linearly projected queries and keys
-        self.d_v = d_v  # Dim of the linearly projected values
-        self.W_q = Dense(d_k)  # Learned projection matrix for the queries, ...
-        self.W_k = Dense(d_k)  # ... for the keys
-        self.W_v = Dense(d_v)  # ... for the values
+        self.W_q = Dense(d_model)  # Learned projection matrix for the queries, ...
+        self.W_k = Dense(d_model)  # ... for the keys
+        self.W_v = Dense(d_model)  # ... for the values
         self.W_o = Dense(d_model)  # ... for the multi-head output
 
     def reshape_tensor(self, x, n_heads, in_flag):
         if in_flag:
             # Tensor shape after reshaping and transposing:
             # (batch_size, n_heads, seq_length, -1)
+            print(f"Before reshape: {x.shape=} ({in_flag=})")
             x = reshape(x, shape=(shape(x)[0], shape(x)[1], n_heads, -1))
             x = transpose(x, perm=(0, 2, 1, 3))
+            print(f"After reshape: {x.shape=} ({in_flag=})")
         else:
             # Reverting the reshaping and transposing operations:
             # (batch_size, seq_length, d_model)
+            print(f"Before reshape: {x.shape=} ({in_flag=})")
             x = transpose(x, perm=(0, 2, 1, 3))
             x = reshape(x, shape=(shape(x)[0], shape(x)[1], -1))
+            print(f"After reshape: {x.shape=} ({in_flag=})")
         return x
 
     def call(self, queries, keys, values, mask=None):
         # Rearrange the queries to be able to compute all heads in parallel
+        print(f"{queries.shape=}")
         q_reshaped = self.reshape_tensor(self.W_q(queries), self.n_heads, True)
         # Resulting tensor shape: (batch_size, n_heads, input_seq_length, -1)
-
+        print(f"{q_reshaped.shape=}")
         # Rearrange the keys to be able to compute all heads in parallel
         k_reshaped = self.reshape_tensor(self.W_k(keys), self.n_heads, True)
         # Resulting tensor shape: (batch_size, n_heads, input_seq_length, -1)
@@ -71,7 +71,7 @@ class MultiHeadAttention(Layer):
 
         # Rearrange back the output into concatenated form
         o_reshaped = self.reshape_tensor(o, self.n_heads, False)
-        # Resulting tensor shape: (batch_size, input_seq_length, d_v)
+        # Resulting tensor shape: (batch_size, input_seq_length, d_model)
 
         # Apply one final linear projection to the output to generate the multi-head
         # attention. Resulting tensor shape: (batch_size, input_seq_length, d_model)
