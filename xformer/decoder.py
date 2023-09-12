@@ -1,11 +1,15 @@
-from tensorflow.keras.layers import Dropout, Layer
+from tensorflow.keras.layers import Dropout, Layer, Input
+from tensorflow.keras import Model
 from xformer.common import AddAndNorm, FeedForward
 from xformer.multihead_attention import MultiHeadAttention
 from xformer.positional_encoding import CustomEmbeddingWithFixedPosnWts
 
 class DecoderLayer(Layer):
-    def __init__(self, n_heads, d_model, d_ff, dropout_rate, **kwargs):
+    def __init__(self, sequence_length, n_heads, d_model, d_ff, dropout_rate, **kwargs):
         super().__init__(**kwargs)
+        self.build(input_shape=[None, sequence_length, d_model])
+        self.d_model = d_model
+        self.sequence_length = sequence_length
         self.multihead_attention1 = MultiHeadAttention(n_heads, d_model)
         self.dropout1 = Dropout(dropout_rate)
         self.add_norm1 = AddAndNorm()
@@ -43,6 +47,10 @@ class DecoderLayer(Layer):
         # Followed by another Add & Norm layer
         return self.add_norm3(addnorm_output2, feedforward_output)
     
+    def build_graph(self):
+        input_layer = Input(shape=(self.sequence_length, self.d_model))
+        return Model(inputs=[input_layer], outputs=self.call(input_layer, None, input_layer, None, True))
+    
 class Decoder(Layer):
     def __init__(
         self,
@@ -61,19 +69,19 @@ class Decoder(Layer):
         )
         self.dropout = Dropout(dropout_rate)
         self.decoder_layer = [
-            DecoderLayer(n_heads, d_model, d_ff, dropout_rate) for _ in range(n)
+            DecoderLayer(sequence_length, n_heads, d_model, d_ff, dropout_rate) for _ in range(n)
         ]
 
     def call(
         self,
-        output_target,
+        target_sequence,
         mask,
         encoder_output,
         encoder_mask,
         training,
     ):
         # Generate the positional encoding
-        pos_encoding_output = self.pos_encoding(output_target)
+        pos_encoding_output = self.pos_encoding(target_sequence)
         # Expected output shape = (number of sentences, sequence_length, d_model)
         # Add in a dropout layer
         x = self.dropout(pos_encoding_output, training=training)

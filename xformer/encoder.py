@@ -1,11 +1,15 @@
-from tensorflow.keras.layers import Dropout, Layer
+from tensorflow.keras.layers import Dropout, Layer, Input
+from tensorflow.keras import Model
 from xformer.common import AddAndNorm, FeedForward
 from xformer.multihead_attention import MultiHeadAttention
 from xformer.positional_encoding import CustomEmbeddingWithFixedPosnWts
 
 class EncoderLayer(Layer):
-    def __init__(self, n_heads, d_model, d_ff, dropout_rate, **kwargs):
+    def __init__(self, sequence_length, n_heads, d_model, d_ff, dropout_rate, **kwargs):
         super().__init__(**kwargs)
+        self.build(input_shape=[None, sequence_length, d_model])
+        self.d_model = d_model
+        self.sequence_length = sequence_length
         self.multihead_attention = MultiHeadAttention(n_heads, d_model)
         self.dropout1 = Dropout(dropout_rate)
         self.add_norm1 = AddAndNorm()
@@ -31,6 +35,10 @@ class EncoderLayer(Layer):
         )
         # Followed by another Add & Norm layer
         return self.add_norm2(addnorm_output1, feedforward_output)
+    
+    def build_graph(self):
+        input_layer = Input(shape=(self.sequence_length, self.d_model))
+        return Model(inputs=[input_layer], outputs=self.call(input_layer, None, True))
 
 class Encoder(Layer):
     def __init__(
@@ -50,7 +58,7 @@ class Encoder(Layer):
         )
         self.dropout = Dropout(dropout_rate)
         self.encoder_layers = [
-            EncoderLayer(n_heads, d_model, d_ff, dropout_rate)
+            EncoderLayer(sequence_length, n_heads, d_model, d_ff, dropout_rate)
             for _ in range(n_enc_layers)
         ]
 
