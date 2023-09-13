@@ -1,5 +1,5 @@
 # Building Transformer Models with Attention
-## Implementation from Scratch in Tensorflow Keras
+## Implementation from Scratch in TensorFlow Keras
 
 Following [this book](https://machinelearningmastery.com/transformer-models-with-attention/) to teach myself about the transformer architecture in depth.
 
