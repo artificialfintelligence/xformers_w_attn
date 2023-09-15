@@ -16,6 +16,7 @@ build/
 dist/
 
 # Models & Data
+**/data/
 *.csv
 
 # Docker
