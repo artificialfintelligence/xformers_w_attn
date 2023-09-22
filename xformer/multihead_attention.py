@@ -14,7 +14,7 @@ class DotProductAttention(Layer):
         )
         # Apply mask to the attention scores
         if mask is not None:
-            scores += float("-inf") * mask
+            scores += -1e9 * mask
         # Compute the weights using a softmax operation
         weights = softmax(scores)
         # Compute attention by a weighted sum of the value vectors
