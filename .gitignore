@@ -18,6 +18,9 @@ dist/
 # Models & Data
 **/data/
 *.csv
+*.pkl
+**/weights/
+**/checkpoints/
 
 # Docker
 docker_volume/
