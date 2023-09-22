@@ -5,7 +5,7 @@ from xformer.decoder import Decoder
 from xformer.encoder import Encoder
 
 class Xformer(Model):
-    def padding_mask(self, inuput):
+    def padding_mask(self, input):
         # Create mask marking zero padding values in the input by 1s
         mask = math.equal(input, 0)
         mask = cast(mask, float32)
@@ -62,7 +62,7 @@ class Xformer(Model):
 
     def call(self, enc_input, dec_input, training):
         # Create padding mask to mask the encoder inputs as well as the encoder outputs (which are input to the decoder)
-        enc_mask = self.padding_mask(enc_input)
+        enc_padding_mask = self.padding_mask(enc_input)
 
         # Create and combine padding and look-ahead masks to be fed into the decoder
         dec_padding_mask = self.padding_mask(dec_input)
@@ -74,7 +74,7 @@ class Xformer(Model):
 
         # Feed encoder output into the decoder
         dec_output = self.decoder(
-            dec_input, dec_mask, enc_output, enc_mask, training
+            dec_input, dec_mask, enc_output, enc_padding_mask, training
         )
 
         # Pass decoder output through a final Dense layer
